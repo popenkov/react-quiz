@@ -69,3 +69,73 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 # react-quiz
+
+
+npm install -g yarn
+Для запуска yarn start
+
+СОЗДАНИЕ LAYOUT
+Это компонент высокого порядка, который будет содержать в себе всю разметку.
+По сути это обертка которая для пропсчлдрен, которая оборачивает все в тег мейн и задает классы флекс для содержимого.
+
+Для того, чтобы взаимодействовать с CSS модулями, достаточно переименовать файл с постфиксом .module
+Например: App.css -> App.module.css
+
+Как потом выглядит импорт. В стилях экспорта нет
+import React, { Component } from "react"
+import styles from './Layout.module.css'
+
+export default class Layout extends Component {
+    render () {
+        return (
+            //это корневой див всего приложения
+            <div className={styles.Layout}>
+                <main > 
+                    {this.props.children}
+                </main>
+            </div>
+        )
+    }
+}
+
+Стили пишутся для контейнера и дальше описывается вложенность
+.Layout {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.Layout main {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+
+Создание главное страниц.
+Создали папку контейнерс. В ней будут компоненты, которые обладают собственным стейтом. То есть корневые контейнеры.
+И папку компонентс для функциональных компонентов, которые будут просто отрисовывать чтото
+
+Компонент ActiveQuiz.js отвечает за текущий вопрос
+Можно так писать функциональный компонент. Тип  он сразу в круглых скобках возвращает что нам надо 
+const ActiveQuiz = props => (
+    
+)
+
+&nbsp;
+Символ пробела
+
+
+Обработка события
+Мы записываем функцию в корневом компоненте со стэйтом и передаем по иерархии вниз до компонента, в котором будет обработчик события.
+Передаем так 
+onAnswerClick = { this.onAnswerClickHandler}
+Если надо дальше передать, то так:
+        <AnswersList
+            onAnswerClick = { props.onAnswerClick}
+        />
+
+В обработчике событий пишем функцию внутри стрелочной, чтобы функция сама не вызвалась 
+        <li onClick={() => props.onAnswerClick(props.answer.id)}>
+        </li>
+
