@@ -139,3 +139,16 @@ onAnswerClick = { this.onAnswerClickHandler}
         <li onClick={() => props.onAnswerClick(props.answer.id)}>
         </li>
 
+Динамическое изменение классов по клику происходит из state. Если ответ правильный мы меняем значение стэйта и пропсом передаем в компонент.
+    const AnswerItem = props => {
+    const cls = [classes.AnswerItem]
+    if (props.state) {
+        cls.push(classes[props.state])
+    }
+    return (
+        <li className ={cls.join(' ')} 
+        onClick={() => props.onAnswerClick(props.answer.id)}>
+            {props.answer.text}
+        </li>
+    )
+}

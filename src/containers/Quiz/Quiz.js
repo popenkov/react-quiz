@@ -10,6 +10,7 @@ export default class Quiz extends Component {
     } */
     state = {
         activeQuestion: 0,
+        answerState: null,
         quiz: [
             {
                 question: 'What color is the sky?',
@@ -24,8 +25,8 @@ export default class Quiz extends Component {
             },
             {
                 question: 'What year was founded Saint-Petersburg?',
-                rightAnswerId: 2,
-                id: 3,
+                rightAnswerId: 3,
+                id: 2,
                 answers: [
                     {text: '1700', id: 1},
                     {text: '1702', id: 2},
@@ -37,12 +38,43 @@ export default class Quiz extends Component {
 
     }
 
+
+
     onAnswerClickHandler = (answerId) => {
         console.log('Answer ID: ', answerId)
 
-        this.setState({
-            activeQuestion: this.state.activeQuestion + 1
-        })
+        const question = this.state.quiz[this.state.activeQuestion]
+
+        if (question.rightAnswerId === answerId) {
+            this.setState({
+                answerState: {[answerId]: 'success'} 
+            })
+
+            //чтобы в течение секунды показать, что ответ правильный
+            const timeout = window.setTimeout(() => {
+                //проверка, закончились ли вопросы
+                if (this.isQuizFinished()) {
+                    console.log('finished')
+                } else {
+                    this.setState({
+                        activeQuestion: this.state.activeQuestion + 1,
+                        answerState: null
+                    })
+                }
+
+                window.clearTimeout(timeout);
+            }, 1000)
+
+        } else {
+            this.setState({
+                answerState: {[answerId]: 'error'} 
+            })
+
+        } 
+    }
+
+    isQuizFinished () {
+        return this.state.activeQuestion + 1 === this.state.quiz.length;
     }
 
     render () {
@@ -57,6 +89,7 @@ export default class Quiz extends Component {
                     question={this.state.quiz[this.state.activeQuestion].question}
                     onAnswerClick = { this.onAnswerClickHandler}
                     answerNumber = {this.state.activeQuestion + 1}
+                    state = {this.state.answerState}
                     />
                 </div>
             </div>
