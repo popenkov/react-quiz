@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import classes from './Quiz.module.css'
 import ActiveQuiz from '../../components/ActiveQuiz/ActiveQuiz'
+import FinishedQuiz from '../../components/FinishedQuiz/FinishedQuiz' 
 
 
 
@@ -9,8 +10,10 @@ export default class Quiz extends Component {
 
     } */
     state = {
+        results: {}, // [id]: 'success' 'error'
         activeQuestion: 0,
-        answerState: null,
+        answerState: null, // [id]: 'success' 'error'
+        isFinished: true,
         quiz: [
             {
                 question: 'What color is the sky?',
@@ -49,21 +52,25 @@ export default class Quiz extends Component {
             if (this.state.answerState[key] === 'success') {
                 return;
             }
-            console.log(this.state.answerState[key] )
         }
 
         const question = this.state.quiz[this.state.activeQuestion]
+        const results = this.state.results
 
         if (question.rightAnswerId === answerId) {
             this.setState({
-                answerState: {[answerId]: 'success'} 
+                answerState: {[answerId]: 'success'} ,
             })
+            results[answerId] = 'success';
 
             //чтобы в течение секунды показать, что ответ правильный
             const timeout = window.setTimeout(() => {
                 //проверка, закончились ли вопросы
                 if (this.isQuizFinished()) {
-                    console.log('finished')
+                    
+                    this.setState({
+                        isFinished: true
+                    })
                 } else {
                     this.setState({
                         activeQuestion: this.state.activeQuestion + 1,
@@ -75,8 +82,10 @@ export default class Quiz extends Component {
             }, 1000)
 
         } else {
+            results[answerId] = 'error';
             this.setState({
-                answerState: {[answerId]: 'error'} 
+                answerState: {[answerId]: 'error'},
+                results: results 
             })
 
         } 
@@ -92,14 +101,22 @@ export default class Quiz extends Component {
                 
                 <div className={classes.QuizWrapper}>
                     <h1>Please, answer the questions</h1>
-                    <ActiveQuiz 
-                    quizLength = {this.state.quiz.length}
-                    answers={this.state.quiz[this.state.activeQuestion].answers}
-                    question={this.state.quiz[this.state.activeQuestion].question}
-                    onAnswerClick = { this.onAnswerClickHandler}
-                    answerNumber = {this.state.activeQuestion + 1}
-                    state = {this.state.answerState}
-                    />
+
+                    {
+                        this.state.isFinished 
+                        ? <FinishedQuiz
+
+                            />
+                        : <ActiveQuiz 
+                            quizLength = {this.state.quiz.length}
+                            answers={this.state.quiz[this.state.activeQuestion].answers}
+                            question={this.state.quiz[this.state.activeQuestion].question}
+                            onAnswerClick = { this.onAnswerClickHandler}
+                            answerNumber = {this.state.activeQuestion + 1}
+                            state = {this.state.answerState}
+                            />
+                    }
+
                 </div>
             </div>
         )

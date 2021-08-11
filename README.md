@@ -152,3 +152,12 @@ onAnswerClick = { this.onAnswerClickHandler}
         </li>
     )
 }
+
+
+
+Использование готовых иконок
+font awesome cdn
+скрипты подобные можно подключать на страницу index.html в папке public
+
+Библиотека, чтобы задавать несколько классов одновременно https://www.npmjs.com/package/classnames 
+или писать так, чтобы в итоге получилась строка с пробелом className={classes.FontAwesomeIcon + ` ${classes.success}`}
