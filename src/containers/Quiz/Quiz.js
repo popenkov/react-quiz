@@ -13,7 +13,7 @@ export default class Quiz extends Component {
         results: {}, // [id]: 'success' 'error'
         activeQuestion: 0,
         answerState: null, // [id]: 'success' 'error'
-        isFinished: true,
+        isFinished: false,
         quiz: [
             {
                 question: 'What color is the sky?',
@@ -27,7 +27,7 @@ export default class Quiz extends Component {
                 ]
             },
             {
-                question: 'What year was founded Saint-Petersburg?',
+                question: 'What year was Saint-Petersburg founded?',
                 rightAnswerId: 3,
                 id: 2,
                 answers: [
@@ -58,10 +58,14 @@ export default class Quiz extends Component {
         const results = this.state.results
 
         if (question.rightAnswerId === answerId) {
+            if (!results[question.id]) { //если объект пустой
+                results[question.id] = 'success';
+            } 
             this.setState({
                 answerState: {[answerId]: 'success'} ,
+                results
             })
-            results[answerId] = 'success';
+            
 
             //чтобы в течение секунды показать, что ответ правильный
             const timeout = window.setTimeout(() => {
@@ -82,13 +86,22 @@ export default class Quiz extends Component {
             }, 1000)
 
         } else {
-            results[answerId] = 'error';
+            results[question.id] = 'error';
             this.setState({
                 answerState: {[answerId]: 'error'},
-                results: results 
+                results: results //или просто results
             })
 
         } 
+    }
+
+    startNewGame = () => {
+        this.setState({
+            results: {}, 
+            activeQuestion: 0,
+            answerState: null, 
+            isFinished: false,
+        })
     }
 
     isQuizFinished () {
@@ -105,6 +118,9 @@ export default class Quiz extends Component {
                     {
                         this.state.isFinished 
                         ? <FinishedQuiz
+                            results = {this.state.results}
+                            quiz = {this.state.quiz}
+                            startNewGame = {this.startNewGame}
 
                             />
                         : <ActiveQuiz 
