@@ -5,12 +5,13 @@ import { faTimes, faBars } from '@fortawesome/free-solid-svg-icons'
 
 const MenuToggle = props => {
     const cls = [
-        classes.MenuToggle,
-        ''
+        classes.MenuToggle
     ]
+
     let icon;
     if (props.isOpen) {
         icon = faTimes;
+        cls.push(classes.open)
     } else {
         icon = faBars;
     }

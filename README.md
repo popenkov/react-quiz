@@ -161,3 +161,17 @@ font awesome cdn
 
 Библиотека, чтобы задавать несколько классов одновременно https://www.npmjs.com/package/classnames 
 или писать так, чтобы в итоге получилась строка с пробелом className={classes.FontAwesomeIcon + ` ${classes.success}`}
+
+
+в лэйауте описывать стэйт для пока и скрытия меню гамбургера. this.state.isOpen
+Для закрытия по клику вне меню создавать компонент затемнения, который занимает все свободное пространство и изменяет стейт по клику на себе
+    return (
+        <>
+            <nav className={cls.join(' ')}>
+                <ul>
+                    {this.renderLinks()}
+                </ul>
+            </nav>
+            {this.props.isOpen ? <BackDrop onClick={this.props.onClose}/> : null}
+        </>            
+    )
