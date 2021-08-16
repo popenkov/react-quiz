@@ -71,6 +71,442 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 # react-quiz
 
 
+
+ReactDOM.render(what, where);
+JSX весь JS внутри тегов пишется внутри фигурных скобок {props.title}
+Все компоненты должны быть обернуты в общий родительский компонент, который помещается в метод  ReactDOM.render(what, where);
+Можно просто создать переменную (не как компонент)  и в нее поместить компоненты 
+
+```sh
+const App = (
+  <div>
+    <Car name="Ford Focus" year="2017" />
+    <Car name="Audi A8" year="2015" />
+    <Car name="Mazda 3" year="2010" />
+  </div>
+)
+
+ReactDOM.render(
+  App,
+  document.querySelector('#root')
+)
+
+Package.json
+"scripts": {
+  "start": "react-scripts start",
+  "build": "react-scripts build",
+  "test": "react-scripts test",
+  "eject": "react-scripts eject"
+},
+```
+
+Yarn аналог  нпм, создан фэйсбуком. Может быть быстрее
+App.js – это то приложение где все собирается и которое вставляется
+Все есть компоненты и они могут быть вложены друг в друга.
+
+## JSX
+Снизу две одинаковые записи:
+```sh
+class App extends Component {
+  render() {
+    return (
+      <div className="App">
+        <h1>Hello world!</h1>
+      </div>
+    );
+
+    // return React.createElement(
+    //   'div',
+    //   {
+    //     className: 'App'
+    //   },
+    //   React.createElement(
+    //     'h1',
+    //     null,
+    //     'Hello world!'
+    //   )
+    // )
+  }
+}
+```
+Важно импортировать Реакт,так как именно он занимается компиляцией ЖСХ в Джаваскрипт
+### ОГРАНИЧЕНИЯ
+className для задания классов
+В методе render при возврате надо возвращать только один элемент. То есть несколько элементов надо оборачивать в один корневой элемент. Например, див, или пустой тег
+
+### INLINE СТИЛИ
+В фигурных скобках можно передавать объект со стилями.
+```sh
+class App extends Component {
+  render() {
+    const divStyle = {
+      textAlign: 'center'
+    }
+
+    return (
+      <div style={divStyle}>
+        <h1 style={{color: 'blue', fontSize: '20px'}}>Hello world!</h1>
+      </div>
+    );
+  }
+}
+```
+### Создание новых компонентов:
+- в папке срс создаем файл под каждый компонент с большой буквы.
+- компонент должен экспортироваться из своего файла и импортироваться в нужных файл компонента
+- затем вставляем компонент как обычный тег
+
+### ВЫВОД ДИНАМИЧЕСКИХ ДАННЫХ
+Джаваскрипт оборачивается в фигурные скобки внутри ЖСХ тегов.
+Пропсы передаются как атрибуты тега компонента
+```sh
+<Car name={'Ford'} year={2018} />
+А в компоненте пропсы принимаются как ключи объекта props
+export default props => (
+  <div>
+    <h3>Сar name: {props.name}</h3>
+    <p>Year: <strong>{props.year}</strong></p>
+  </div>
+)
+```
+Мы можем передавать также данные в парный тег компонента: 
+```sh
+        <Car name="Audi" year={2016}>
+         	 <p style={{color: 'red'}}>COLOR</p>
+        </Car>
+```
+И обрабатывать его через ключ children:
+```sh
+export default props => (
+  <div>
+    <h3>Сar name: {props.name}</h3>
+    <p>Year: <strong>{props.year}</strong></p>
+    { props.children }
+  </div>
+)
+```
+
+## ОСНОВЫ РЕАКТ
+Хорошей практикой является не передача пропсов как бы напрямую, а передача их из стейта. Так данные можно изменить в одном стэйте и они поменяются везде.
+```sh
+class App extends Component {
+  state = {
+    cars: [
+      {name: 'Ford', year: 2018},
+      {name: 'Audi', year: 2016},
+      {name: 'Mazda', year: 2010}
+    ],
+    pageTitle: 'React components'
+  }
+
+  render() {
+    const divStyle = {
+      textAlign: 'center'
+    }
+
+    const cars = this.state.cars
+
+    return (
+      <div style={divStyle}>
+        <h1>{this.state.pageTitle}</h1>
+
+        <Car name={cars[0].name} year={cars[0].year} />
+        <Car name={cars[1].name} year={cars[1].year} />
+        <Car name={cars[2].name} year={cars[2].year} />
+      </div>
+    );
+  }
+}
+```
+### Добавление событий
+обработчики записываются инлайново
+<button onClick={this.changeTitleHandler}>Change title</button>
+Колбэк функцию принято называть через handle / Handler. Записывает метод в корень класса в виде стрелочной функции.
+  changeTitleHandler = () => {
+    console.log('Clicked')
+  }
+
+ this – все элементы данного компонента, при обращении внутри него
+### ИЗМЕНЕНИЕ СТЭЙТ
+Реакт должен явно видеть изменение стэйта, чтобы заново отрендерить компонент (после изменения состояния метод рендер вызывается автоматически). Поэтому менять напрямую стэйт не получится и надо использовать метод setState(), в который передавать новый объект только с тем состоянием (ключем), которое мы меняем.
+```sh
+  changeTitleHandler = () => {
+    const oldTitle = this.state.pageTitle
+    const newTitle = oldTitle + ' (changed)'
+    this.setState({
+      pageTitle: newTitle
+    })
+  }
+```
+ПЕРЕДАЧА ПАРАМЕТРОВ В ФУНКЦИЮ
+https://ru.reactjs.org/docs/faq-functions.html
+Если кнопка находится в дочернем компоненте, как передать информацию вверх в родительский, чтобы в родительском произошли изменения.
+ Мы передаем из родительского элемента в дочерний пропсом функцию с любым названием.
+ А в дочернем компоненте пишем на кнопку событие и передаем в него эту функцию из пропса.
+Дочерний элемент внутри:
+```sh
+export default props => (
+  <div>
+    <h3>Сar name: {props.name}</h3>
+    <p>Year: <strong>{props.year}</strong></p>
+    <button onClick={props.onChangeTitle}>Click</button>
+  </div>
+)
+```
+Метод в родителе:
+```sh
+ changeTitleHandler = (newTitle) => {
+    this.setState({
+      pageTitle: newTitle
+    })
+  }
+```
+Параметры функции можно передавать несколькими способами. 
+Метод bind. Мы сообщаем в нем новый контекст и новое значение в атрибутах. Этот метод лучше, так как он более производительнее.
+```sh
+<Car
+  name={cars[0].name}
+  year={cars[0].year}
+  onChangeTitle={this.changeTitleHandler.bind(this, cars[0].name)}
+/>
+```sh
+Либо можно параметром передать стрелочную функцию в которой прописать функцию с параметром.
+```sh
+<Car
+  name={cars[1].name}
+  year={cars[1].year}
+  onChangeTitle={() => this.changeTitleHandler(cars[1].name)}
+/>
+```
+В React, как правило, привязывать нужно только те методы, которые вы хотите передать другим компонентам. Например, <button onClick={this.handleClick}> передаёт this.handleClick, поэтому его нужно привязать. 
+https://yehudakatz.com/2011/08/11/understanding-javascript-function-invocation-and-this/
+
+ОБРАБОТКА ИНПУТ
+На инпут вешаем обработчик онЧэйндж
+```sh
+<input type="text" onChange={this.handleInput} />
+```
+и обрабатываем объект ивент
+```sh
+handleInput = (event) => {
+  this.setState({
+    pageTitle: event.target.value
+  })
+}
+```
+
+### РАБОТА СО СПИСКОМ
+Чтобы вручную не писать 3 раза компонент автомобиля, мы можем массив из стейта пропустить через метод map. В Реакте есть все методы из ЖС.
+Надо помнить, что каждому элементу списка надо добавлять уникальный ключ. Реакт должен знать какие элементы есть и какие изменяются, чтобы управлять отдельными элементами списка и экономить ресурсы а не всем списком сразу.
+Поэтому добавляем параметр key и заполняем его индексом из метода мап.
+```sh
+    return (
+      <div style={divStyle}>
+        { this.state.cars.map((car, index) => {
+          return (
+            <Car
+              key={index}
+              name={car.name}
+              year={car.year}
+              onChangeTitle={() => this.changeTitleHandler(car.name)}
+            />
+          )
+        }) }
+      </div>
+    );
+```
+### РАБОТА С УСЛОВНЫМИ ОПЕРАТОРАМИ
+Вывод элементов по условию
+В стейте заводим новый ключ и функцию по его инвертированию
+```sh
+  state = {
+    cars: [
+      {name: 'Ford', year: 2018},
+      {name: 'Audi', year: 2016},
+      {name: 'Mazda', year: 2010}
+    ],
+    pageTitle: 'React components',
+    showCars: false
+  }
+
+  toggleCarsHandler = () => {
+    this.setState({
+      showCars: !this.state.showCars
+    })
+  }
+```
+If … else …, for блочные конструкции запрещены в JSX, но мы можем использовать тернарный оператор внутри JSX.
+
+Либо мы можем использовать блочные условия вне JSX. То есть выше return.
+```sh
+render() {
+    const divStyle = {
+      textAlign: 'center'
+    }
+
+    let cars = null
+
+    if (this.state.showCars) {
+      cars = this.state.cars.map((car, index) => {
+        return (
+          <Car
+            key={index}
+            name={car.name}
+            year={car.year}
+            onChangeTitle={() => this.changeTitleHandler(car.name)}
+          />
+        )
+      })
+    }
+
+    return (
+      <div style={divStyle}>
+        <h1>{this.state.pageTitle}</h1>
+
+        <button
+          onClick={this.toggleCarsHandler}
+        >Toggle cars</button>
+
+        { cars }
+      </div>
+    );
+  }
+```
+
+### ДИНАМИЧЕСКИЕ СПИСКИ
+изменяем имя компонента через инпут самого компонента
+*** Весь стэйт хранится в корневом элементе, а дочерние элементы функциональные и просто отрисовывают информацию из корневого
+
+Узнать какой элемент списка мы изменяем мы можем по индексу из метода мап, который мы записывали в ключ.
+
+Чтобы изменять стейт, мы можем создавать дубликат массива и переписывать весь стейт
+Например. 
+Const cars = this.state.cars.concat()
+или
+Const cars = [...this.state.cars]
+
+Удаление элемента
+Стрелочная функция не создает свой контекст, поэтому создавая такой метод мы можем свободно использовать слово this внутри метода, и он будет ссылаться на компонент. 
+Если мы пишем метод по старым стандартам, то передавать его в пропс для дочернего элемента надо либо обернув внутрь стрелочной функции, либо использовать метод bind(this, proprties). Иначе внутри метода родителя не получится обращаться к this.
+```sh
+        return (
+          <Car
+            key={index}
+            name={car.name}
+            year={car.year}
+            onDelete={this.deleteHandler.bind(this, index)}
+            onChangeName={event => this.onChangeName(event.target.value, index)}
+          />
+        )
+```
+Удаляет элемент из массива через метод splice(index, 1) копии массива и затем перезаписи стэйта
+
+### СТИЛИЗАЦИЯ КОМПОНЕНТОВ
+Инлайновые стили задаются через атрибут стайл, в который передается JS объект.
+```sh
+        <div style={{
+          width: 400,
+          margin: 'auto',
+          paddingTop: '20px'
+        }}>
+          { cars }
+        </div>
+```
+Подключение css
+```sh
+import ‘./car.css’
+```
+Динамические классы
+Он создает массив классов и в зависимости от условий пушит туда новые классы. Затем массив через метод джон прописывает инлайново элементу
+. Пропс.нэйм — это значение инпута. Если он пустой то красная граница
+```sh
+export default props => {
+  const inputClasses = ['input']
+
+  if (props.name !== '') {
+    inputClasses.push('green')
+  } else {
+    inputClasses.push('red')
+  }
+
+  if (props.name.length > 4) {
+    inputClasses.push('bold')
+  }
+
+  return (
+    <div className="Car">
+      <h3>Сar name: {props.name}</h3>
+      <p>Year: <strong>{props.year}</strong></p>
+      <input
+        type="text"
+        onChange={props.onChangeName}
+        value={props.name}
+        className={inputClasses.join(' ')}
+      />
+      <button onClick={props.onDelete}>Delete</button>
+    </div>
+  )
+}
+```
+
+RADIUM
+как задавать псевдоселекторы внутри JS? То есть внутри инлайновых стилей.
+Для этого нужна библиотека радиум.
+https://github.com/FormidableLabs/radium
+npm install -g yarn для установки йарн
+yarn add radium
+# or
+npm install --save radium
+import React from 'react'
+import Radium from 'radium'
+import './Car.css'
+
+const Car = props => {
+  const inputClasses = ['input']
+
+  if (props.name !== '') {
+    inputClasses.push('green')
+  } else {
+    inputClasses.push('red')
+  }
+
+  if (props.name.length > 4) {
+    inputClasses.push('bold')
+  }
+
+  const style = {
+    border: '1px solid #ccc',
+    boxShadow: '0 4px 5px 0 rgba(0, 0, 0, .14)',
+    ':hover': { !!!!!!!!!!
+      border: '1px solid #aaa',
+      boxShadow: '0 4px 15px 0 rgba(0, 0, 0, .25)',
+      cursor: 'pointer'
+    }
+  }
+
+  return (
+    <div className="Car" style={style}>
+      <h3>Сar name: {props.name}</h3>
+      <p>Year: <strong>{props.year}</strong></p>
+      <input
+        type="text"
+        onChange={props.onChangeName}
+        value={props.name}
+        className={inputClasses.join(' ')}
+      />
+      <button onClick={props.onDelete}>Delete</button>
+    </div>
+  )
+}
+
+export default Radium(Car)
+!!!!!
+
+
+Препроцессоры
+npm add node-sass – после этого можно сасс использовать
+
+
 npm install -g yarn
 Для запуска yarn start
 
@@ -178,15 +614,16 @@ font awesome cdn
 
 
 
-07 React Router
+## 07 React Router
 
-059 Установка и настройка
+### 059 Установка и настройка
 Пакет react-router
 https://reactrouter.com/web/guides/philosophy 
 Yarn add react-router-dom – установка
 Весь код надо обернуть в HOC компонент на странице индекс.жс
 import {BrowserRouter} from 'react-router-dom'
 
+```sh
 const app = (
   <BrowserRouter>
     <App />
@@ -194,10 +631,11 @@ const app = (
 )
 
 ReactDOM.render(app, document.getElementById('root'));
+```
 
-Этот компонент говорит приложению, что мы используем роутинг и надо добавить соответствующий функционал
+Этот компонент BrowserRouter говорит приложению, что мы используем роутинг и надо добавить соответствующий функционал
 
-060 Регистрация роута
+### 060 Регистрация роута
 Например, у нас есть на странице компоненты, которые хотелось бы подать, как отдельные страницы.  Для этого надо зарегистрировать роут. 
 В компонент, где используем роутинг, импортируем 
 import {Route} from 'react-router-dom'
@@ -206,15 +644,18 @@ import {Route} from 'react-router-dom'
 <Route path="/" exact render={() => <h1>Home Page</h1>} />
 Path- обязательный параметр. Путь для страницы
 Render - что будем рендерить. Передается коллбэк функция, которая что-то возвращает. Например, жсх который отрисуется на данной странице
-Exact означает что рендер произойдет, только если адрес из пути полностью совпадает. Например корневой адрес / есть на всех страницах, поэтому без данного параметра заголовой хом пэйдж будет показан на каждой странице
+Exact означает что рендер произойдет, только если адрес из пути полностью совпадает. Например корневой адрес / есть на всех страницах, поэтому без данного параметра заголовой Home Page будет показан на каждой странице
 
-061 Роутинг и компоненты
+### 061 Роутинг и компоненты
 Как зарегистрировать не отдельный жсх, как выше, а целый компонент.
+```sh
 <Route path="/about" component={About} />
+```
 Либо в методе рендер можно поместить компонент
 
-062 Навигация между страницами
+### 062 Навигация между страницами
 Чтобы избежать перезагрузки страниц надо отказаться от ссылок в пользу NavLink. To вместо href
+```sh
 import {Route, NavLink} from 'react-router-dom'
 
         <NavLink to="/">Home</NavLink>
@@ -224,13 +665,15 @@ import {Route, NavLink} from 'react-router-dom'
         <Route path="/" exact render={() => <h1>Home Page</h1>} />
         <Route path="/about" component={About} />
         <Route path="/cars" component={Cars} />
+```
 
-063 Параметры ссылки
+### 063 Параметры ссылки
 Например, мы хотим показать, на какой ссылке сейчас находимся (какая ссылка активная). НавЛинк автоматически добавляет класс active. Нам надо только описать стили. 
 Но, как и ранее корневое имя ссылки есть на каждой странице и поэтому ссылка для домашней страницы всегда будет активна даже на других страницах. Надо добавить exact/
 activeClassName={'wfm-active'} – изменит название класса для активной ссылки (для всех НавЛинков). 
 Для описания конкретной активной ссылки. activeStyle={{ color: 'blue'}}> 
 В to можно передавать не просто строку, а обьект с параметрами
+```sh
 to={{
                 pathname: '/cars',
                 search: '?a=1&b=2', // гет параметры
@@ -260,14 +703,16 @@ to={{
             </li>
           </ul>
         </nav>
+```
 
-064 Программная навигация
+### 064 Программная навигация
 Например, в машинах у нас есть разные марки и при клике на ауди переход нужно сделать дальше:
 /cars/audi
 Динамический роут означает, что данные могут меняться. Например, с ауди на мазду и так далее.
 (Программная навигация - когда не используются реакт компоненты, а реакт роутер?) Можно сделать иерархию роутов внутри страницы.
 Если в классовом компоненте cars в render ввести console.log(props), то мы увидим новые свойства 
 Эти параметры относятся к роутингу. Нам интересна history. Вот как можно по клику вернуться на главную страницу 
+```sh
   goToHomePage = () => {
     this.props.history.push({
       pathname: '/'
@@ -276,15 +721,16 @@ to={{
 
 
 <button onClick={this.goToHomePage}>Go to home page</button>
-
+```
 Метод push принимает разные параметры: или строку, или объект с опциями.
 
-065 Роутинг и функциональные компоненты
+### 065 Роутинг и функциональные компоненты
 ЗАДАЧА. Делаем програмную навигацию при клике по машинам в компоненте карс.
 Ниже консоль.лог внутри функционального компонента машины. 
  
 
-Здесь нет ключей, связанных с роутингом. Чтобы добавить роутинг в функциональные компоненты есть специальная функция withRouter. Это HOC, так что export default withRouter(Car). По сути эта функция оборачивает функциональные компоненты и добавляет им ключи, связанные с роутингом.
+Здесь нет ключей, связанных с роутингом. Чтобы добавить роутинг в функциональные компоненты есть специальная функция withRouter. Это HOC, так что используем так export default withRouter(Car). По сути эта функция оборачивает функциональные компоненты и добавляет им ключи, связанные с роутингом.
+```sh
 import React from 'react'
 import './Car.scss'
 import {withRouter} from 'react-router-dom'
@@ -302,18 +748,18 @@ const Car = props => {
 }
 
 export default withRouter(Car)
+```
 
-
-066 Динамические роуты
-Теперь надо отрисовывать под списком машин информацию о выбранной машине. Чтобы скрывать список мaшин и по клику показывать только выбранную по клику, надо использовать компонент switch
+### 066 Динамические роуты
+Теперь надо отрисовывать под списком машин информацию о выбранной машине. Чтобы скрывать список мaшин и по клику показывать только выбранную по клику, надо использовать компонент `switch`
 Switch выдает первый попавшийся URL, который полностью совпадает с URL адресом в path
-Заводим компонент отдельные CarDetail
+Заводим компонент отдельный CarDetail
 
+```sh
 import React from 'react'
 
 export default class CarDetail extends React.Component {
   render() {
-
     return (
       <div style={{textAlign: 'center'}}>
         <h1>{this.props.match.params.name}</h1>
@@ -322,9 +768,9 @@ export default class CarDetail extends React.Component {
 
   }
 }
-
+```
 Затем в app.js, чтобы указать динамический роут использовать name, которые совпадает с именем из <h1>{this.props.match.params.name}</h1>
-
+```sh
 import {NavLink, Route, Switch} from 'react-router-dom'
 import About from './About/About'
 import Cars from './Cars/Cars'
@@ -373,13 +819,14 @@ class App extends Component {
 
 export default App
 
+```
 
-
-067 Редирект и ошибка 404
+### 067 Редирект и ошибка 404
 Как сделать страницу 404, если использовалась ссылка, которая еще не обрабатывается (несуществующий адрес).
 Роут для 404 должен идти самым последним, чтобы вызваться, если не было найдено совпадений ранее. Записывается роут так. Просто с функцией рендер:
+```sh
 <Route render={() => <h1 style={{color: 'red', textAlign: 'center'}}>404 not found</h1>} />
-
+```
 Второй способ обработки.
 Импортируем редирект:
 import {NavLink, Route, Switch, Redirect} from 'react-router-dom'
@@ -387,6 +834,7 @@ import {NavLink, Route, Switch, Redirect} from 'react-router-dom'
 Можно писать так редирект, чтобы при клике на страницу эбаут мы переходили на страницу карс (не работае внутри Switch)
 <Redirect from="/about"  to=="/cars" />
 При конструкции снизу при переходе на несуществующую ссылку, мы вернемся на главную страницу.
+```sh
         <Switch>
           <Route path="/" exact render={() => <h1>Home Page</h1>}/>
           <Route path="/about" component={About}/>
@@ -395,11 +843,24 @@ import {NavLink, Route, Switch, Redirect} from 'react-router-dom'
           <Redirect to={'/'} />
           {/*<Route render={() => <h1 style={{color: 'red', textAlign: 'center'}}>404 not found</h1>} />*/}
         </Switch>
+```
 
 
-
-068 Защита роутов
+### 068 Защита роутов
 Например, мы хотим скрывать страницу about, если пользователь не залогинен. В Реакте для такого можно просто писать условные конструкции, чтобы регистрировать роут или нет в зависимости от условий
+```sh
 { this.state.isLoggedIn ? <Route path="/about" component={About}/> : null }
+```
+
+### 073 Ссылка через кастомный компонент
+import {Link} from 'react-router-dom'
+по сути этот компонент тоже самое, что и навлинк, но не содержит дополнительных параметров как активная ссылка. Компонент позволяет просто оборачивать ссылкой нужный нам компонент.
+Теперь кнопка ведет на главную страницу:
+                <Link to='/'>
+                    <Button onClick={props.startNewGame} type='success'>
+                        Go to tests list
+                    </Button>
+                </Link>
+
 
 

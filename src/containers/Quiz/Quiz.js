@@ -106,6 +106,11 @@ export default class Quiz extends Component {
 
     isQuizFinished () {
         return this.state.activeQuestion + 1 === this.state.quiz.length;
+    } 
+
+    componentDidMount() {
+        console.log('Quiz id = ', this.props.match.params.id)
+        console.log(this.props)
     }
 
     render () {
