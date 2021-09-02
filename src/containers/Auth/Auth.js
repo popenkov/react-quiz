@@ -45,9 +45,22 @@ export default class Auth extends Component {
         evt.preventDefault();
     }
 
+    validateControl = (value, validation) => {
+ 
+    }
+
     onChangeHandler = (event, controlName) => {
         console.log(`${controlName}: `, event.target.value)
-        /* this.setState(this.state.formControls[controlName].value = event.target.value) */
+        //нельзя мутировать исходный стэйт. создаем копию
+        const formControls = {...this.state.formControls} // спрэд оператор делает независимый объект с копией. так стэйт точно не будет мутировать
+        const control = {...formControls[controlName]}
+        control.value = event.target.value;
+        control.touched = true;
+        control.valid = this.validateControl(control.value, control.validation);
+        formControls[controlName] = control;
+        this.setState({
+            formControls
+        })
     }
 
     renderInputs = () => {
