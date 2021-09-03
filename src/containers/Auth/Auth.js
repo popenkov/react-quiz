@@ -3,6 +3,12 @@ import classes from './Auth.module.css'
 import Button from '../../components/UI/Button/Button'
 import Input from '../../components/UI/Input/Input'
 
+
+function validateEmail(email) {
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+}
+
 export default class Auth extends Component {
     state = {
         formControls: {
@@ -27,7 +33,7 @@ export default class Auth extends Component {
                 touched: false,
                 validation: { 
                     required: true,
-                    minLenth: 6
+                    minLength: 6
                 }
             }
         }
@@ -46,17 +52,38 @@ export default class Auth extends Component {
     }
 
     validateControl = (value, validation) => {
+        if(!validation) { // если параметров для валидации нет, то она пройдена
+            return true;
+        }
+
+        let isValid = true; //по умолчанию все ок
+        if (validation.required) {
+            isValid = value.trim() !== '' && isValid; 
+            //&& isValid - вернет фолс, если первая проверка фолс, а текущая тру.
+        }
+
+        if (validation.email) {
+            //в гугле найти email js regex. перенес функцию наверх (или библиотека is js)
+            isValid = validateEmail(value) && isValid;
+        }
+
+        if (validation.minLength) {
+            isValid = value.length >= validation.minLength && isValid; 
+        }
+        return isValid;
  
     }
 
     onChangeHandler = (event, controlName) => {
-        console.log(`${controlName}: `, event.target.value)
-        //нельзя мутировать исходный стэйт. создаем копию
+        //нельзя мутировать исходный стэйт. создаем копию formControls
         const formControls = {...this.state.formControls} // спрэд оператор делает независимый объект с копией. так стэйт точно не будет мутировать
-        const control = {...formControls[controlName]}
+        const control = {...formControls[controlName]} //копия текущего инпута (контрола)
+        //теперь изменяем значения копии, чтобы потом через сетСтэйт изменить настоящий контрол
         control.value = event.target.value;
         control.touched = true;
+        //функция валидации
         control.valid = this.validateControl(control.value, control.validation);
+
         formControls[controlName] = control;
         this.setState({
             formControls
@@ -73,6 +100,7 @@ export default class Auth extends Component {
                     value={control.value}
                     required={control.required}
                     touched={control.touched}
+                    valid={control.valid}
                     label={control.label}
                     shouldValidate= {!!control.validation}
                     errorMessage={control.errorMessage}
@@ -80,7 +108,6 @@ export default class Auth extends Component {
                 />
             )
         })
-        console.log(inputs)
         return inputs;
     }
 
@@ -92,7 +119,6 @@ export default class Auth extends Component {
                     
                     <form onSubmit={this.submitHandler} className={classes.AuthForm}>
                         {this.renderInputs()}
-                        
 
                         <Button type='success' onClick={this.loginHandler}>Log in</Button>
                         <Button type='primary' onClick={this.registerHandler}>Register</Button>

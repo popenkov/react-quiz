@@ -864,3 +864,101 @@ import {Link} from 'react-router-dom'
 
 
 
+Валидация формы 
+Создать state  для контроля форм. В нем базовые конфигурации инпутов и параметры валидации.
+    state = {
+        formControls: {
+            email: {
+                value: '',
+                type: 'email',
+                label: 'Email',
+                errorMessage: 'Please enter valid email',
+                valid: false, //базовое состояние контрола, но тогда ошибка будет всегда
+                touched: false, // для этого стэйт, чтобы выводить ошибку, только если инпут в фокусе и введены неверные данные.
+                validation: { //правила для валидации контрола
+                    required: true,
+                    email: true
+                }
+            },
+            password: {
+                value: '',
+                type: 'password',
+                label: 'Password',
+                errorMessage: 'Please enter valid password',
+                valid: false,
+                touched: false,
+                validation: { 
+                    required: true,
+                    minLenth: 6
+                }
+            }
+        }
+    }
+
+по этому образцу будут создаваться компоненты инпутов. Для этого заведем функцию и вызовем ее в рендере:
+ {this.renderInputs()}
+
+Сама функция возвращает массив инпутов для отрисовки из объекта formControls.
+
+
+    renderInputs = () => {
+        const inputs = Object.keys(this.state.formControls).map((controlName, index) => {
+            const control=this.state.formControls[controlName];
+            return (
+                <Input
+                    key={controlName+index}
+                    type={control.type}
+                    value={control.value}
+                    required={control.required}
+                    touched={control.touched}
+                    label={control.label}
+                    shouldValidate= {!!control.validation}
+                    errorMessage={control.errorMessage}
+                    onChange={(event)=>{this.onChangeHandler(event, controlName)}}
+                />
+            )
+        })
+        console.log(inputs)
+        return inputs;
+    }
+
+
+Функция валидации и обработчика onChange
+    validateControl = (value, validation) => {
+        if(!validation) { // если параметров для валидации нет, то она пройдена
+            return true;
+        }
+
+        let isValid = true; //по умолчанию все ок
+        if (validation.required) {
+            isValid = value.trim() !== '' && isValid; 
+            //&& isValid - вернет фолс, если первая проверка фолс, а текущая тру.
+        }
+
+        if (validation.email) {
+            //в гугле найти email js regex. перенес функцию наверх (или библиотека is js)
+            isValid = validateEmail(value) && isValid;
+        }
+
+        if (validation.minLength) {
+            isValid = value.length >= validation.minLength && isValid; 
+        }
+        return isValid;
+ 
+    }
+
+    onChangeHandler = (event, controlName) => {
+        //нельзя мутировать исходный стэйт. создаем копию formControls
+        const formControls = {...this.state.formControls} // спрэд оператор делает независимый объект с копией. так стэйт точно не будет мутировать
+        const control = {...formControls[controlName]} //копия текущего инпута (контрола)
+        //теперь изменяем значения копии, чтобы потом через сетСтэйт изменить настоящий контрол
+        control.value = event.target.value;
+        control.touched = true;
+        //функция валидации
+        control.valid = this.validateControl(control.value, control.validation);
+
+        formControls[controlName] = control;
+        this.setState({
+            formControls
+        })
+    }
