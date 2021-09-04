@@ -11,6 +11,8 @@ function validateEmail(email) {
 
 export default class Auth extends Component {
     state = {
+        //сама валидация формы
+        isFormValid: false,
         formControls: {
             email: {
                 value: '',
@@ -85,8 +87,13 @@ export default class Auth extends Component {
         control.valid = this.validateControl(control.value, control.validation);
 
         formControls[controlName] = control;
+        //валидация формы. по умолчанию тру. надо пробежаться по всем контролам и проверить валидные ли они. 
+        let isFormValid = true;
+        Object.keys(formControls).forEach(name => {
+            isFormValid = formControls[name].valid && isFormValid;
+        })
         this.setState({
-            formControls
+            formControls, isFormValid
         })
     }
 
@@ -120,8 +127,17 @@ export default class Auth extends Component {
                     <form onSubmit={this.submitHandler} className={classes.AuthForm}>
                         {this.renderInputs()}
 
-                        <Button type='success' onClick={this.loginHandler}>Log in</Button>
-                        <Button type='primary' onClick={this.registerHandler}>Register</Button>
+                        <Button 
+                            type='success' 
+                            onClick={this.loginHandler}
+                            disabled={!this.state.isFormValid}>                            
+                            Log in</Button>
+
+                        <Button 
+                            type='primary' 
+                            onClick={this.registerHandler}
+                            disabled={!this.state.isFormValid}>>
+                            Register</Button>
                         
                     </form>
                 </div> 
