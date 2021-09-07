@@ -1118,3 +1118,66 @@ export function validate (value, validation = null) {
         })
         
     }
+
+    10 Практика. Работа с сервером
+
+    084 Настройка проекта
+  
+    В реакте нет ничего для работы с сервером, поэтому используют сторонние библиотеки.
+  Firebase https://firebase.google.com/ 
+  От Firebase мы будем использовать базы данных, методы авторизации и хостинг
+  popenkovdev@gmail.com
+  создаем проект - нажимаем Go to console - Create a project
+
+Вкладка develop - database (Realtime Database). СОздаем бд в тестовом режиме, чтобы можно было править
+И мы получаем ссылку на нашу БД
+https://react-quiz-8bce4-default-rtdb.europe-west1.firebasedatabase.app/
+
+Для обращения к серверу можно использовать и встроенный fetch,но удобнее воспользоваться axios
+npm install axios
+
+в квизЛист
+import axios from 'axios'
+
+и для теста
+    componentDidMount () {
+        axios.get('https://react-quiz-8bce4-default-rtdb.europe-west1.firebasedatabase.app/Quiz.json')//надо обязательно заканчивать JSON
+            .then(answer => console.log(answer))
+    }
+
+085 Создание теста
+сейчас будем работать в квизКриэйтор над методом
+    createQuizHandler = evt => {
+        evt.preventDefault();
+        console.log(this.state.quiz)
+
+    }
+
+Здесь мы сохраним наш стэйт в БД
+
+    createQuizHandler = evt => {
+        evt.preventDefault();
+        axios.post('https://react-quiz-8bce4-default-rtdb.europe-west1.firebasedatabase.app/Quizes.json', this.state.quiz)
+            .then(response=> console.log(response))
+            .then(error=> console.log(error))
+    }
+
+А можно использовать такой синтаксис для работы с асинхонными событями
+
+    createQuizHandler = async evt => {
+        evt.preventDefault();
+        try { //с помощью эвэйт мы дождемся ответа и распарсим промис в переменную респонс
+            const response = await axios.post('https://react-quiz-8bce4-default-rtdb.europe-west1.firebasedatabase.app/Quizes.json', this.state.quiz)
+            //обнуляем стэйт
+            this.setState({
+                quiz: [],
+                isFormValid: false,
+                rightAnswerId: 1,
+                formControls: createFormControls()
+            })    
+        } catch (e){
+            console.log(e)
+
+        }
+    }
+

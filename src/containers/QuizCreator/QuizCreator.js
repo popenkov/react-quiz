@@ -5,6 +5,7 @@ import {createControl, validate, validateForm} from '../../form/formFramework'
 import Input from '../../components/UI/Input/Input';
 import Auxiliary from '../../hoc/Auxiliary/Auxiliary';
 import Select from '../../components/UI/Select/Select';
+import axios from 'axios'
 
 function createOptionControl(num) {
     return createControl({
@@ -75,11 +76,23 @@ export default class QuizCreator extends Component {
         
     }
 
-    createQuizHandler = evt => {
+    createQuizHandler = async evt => {
         evt.preventDefault();
-        console.log(this.state.quiz)
+        try { //с помощью эвэйт мы дождемся ответа и распарсим промис в переменную респонс
+            await axios.post('https://react-quiz-8bce4-default-rtdb.europe-west1.firebasedatabase.app/Quizes.json', this.state.quiz)
+            //обнуляем стэйт
+            this.setState({
+                quiz: [],
+                isFormValid: false,
+                rightAnswerId: 1,
+                formControls: createFormControls()
+            })    
+        } catch (e){
+            console.log(e)
 
+        }
     }
+
     changeHandler = (value, controlName) => {
         const formControls = {...this.state.formControls}
         const control = {...formControls[controlName]}
