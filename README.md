@@ -1037,3 +1037,28 @@ function createFormControls() {
 
     ЗАДАЧА: нам надо вернуть два элемента в жсх, но это не возможно, поэтому нам надо добавить обертку, которая сама не будет добавлять никаких тэгов. например React.Fragment или пустой тег
     Но он создал обычный функциональный компонент Auxiliary, которые возвращает пропс чилдрен. по сути тоже самое
+
+    081 Создание компонента Select
+    Так выглядит компонент:
+    const Select = props => {
+    const htmlFor = `${props.label}-${Math.random()}`;//id  для каждого селект
+    return (
+        <div className={classes.Select}>
+            <label 
+                htmlFor={htmlFor}
+                value={props.value}
+                onChange={props.onChange}
+            ></label>
+            { props.option.map((option, index) => {
+                <option
+                    value={option.value}
+                    key={option.value+index}
+                >{option.text}</option>
+            })}
+            <select id={htmlFor}></select>
+
+        </div>
+    ) 
+}
+
+export default Select
