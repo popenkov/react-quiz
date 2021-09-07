@@ -1233,3 +1233,64 @@ componentDidMount используется в 99% случаев
 берем готовые спиннеры с ресурса https://loading.io/css
 ДОбавляем лоадер через через стэйт. по умолчанию лоадинг тру, а когда загрузилось все меняем на фолс. 
 Тернарным оператором по данному ключу отрисовываем при тру лоадер, при фолс наш компонент
+
+088 Загрузка теста
+закончим компонент, который показывает тест Квиз.жс
+нам надо сделать загрузку теста по его ИД this.props.match.params.id)
+
+создал отдельный компонент под аксиос. в нем записал урл в константу
+import axios from "axios";
+
+export default axios.create({
+    baseURL: 'https://react-quiz-8bce4-default-rtdb.europe-west1.firebasedatabase.app/'
+}) 
+
+теперь мы можем импортировать библиотеку в другие компоненты так 
+import axios from '../../axios/axios-quiz';
+
+и теперь строчка запроса будет короче
+axios.post('Quizes.json', this.state.quiz)
+
+удаляем все статичные данные из стэйт
+
+            {
+                question: 'What color is the sky?',
+                rightAnswerId: 2,
+                id: 1,
+                answers: [
+                    {text: 'Black', id: 1},
+                    {text: 'Blue', id: 2},
+                    {text: 'Purple', id: 3},
+                    {text: 'Green', id: 4}
+                ]
+            },
+            {
+                question: 'What year was Saint-Petersburg founded?',
+                rightAnswerId: 3,
+                id: 2,
+                answers: [
+                    {text: '1700', id: 1},
+                    {text: '1702', id: 2},
+                    {text: '1703', id: 3},
+                    {text: '1803', id: 4}
+                ]
+            }
+
+ и заменяем настоящими
+
+ 
+    async componentDidMount() {      
+        try {
+            const response = await axios.get(`Quizes/${this.props.match.params.id}.json`);
+            const quiz = response.data;
+            this.setState({
+                quiz,
+                loading: false
+            })
+            console.log(this.state)
+        } catch (err) {
+            console.log(err)
+        }
+        console.log('Quiz id = ', this.props.match.params.id)
+        console.log(this.props)
+    }

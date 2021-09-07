@@ -5,7 +5,7 @@ import {createControl, validate, validateForm} from '../../form/formFramework'
 import Input from '../../components/UI/Input/Input';
 import Auxiliary from '../../hoc/Auxiliary/Auxiliary';
 import Select from '../../components/UI/Select/Select';
-import axios from 'axios'
+import axios from '../../axios/axios-quiz';
 
 function createOptionControl(num) {
     return createControl({
@@ -79,7 +79,7 @@ export default class QuizCreator extends Component {
     createQuizHandler = async evt => {
         evt.preventDefault();
         try { //с помощью эвэйт мы дождемся ответа и распарсим промис в переменную респонс
-            await axios.post('https://react-quiz-8bce4-default-rtdb.europe-west1.firebasedatabase.app/Quizes.json', this.state.quiz)
+            await axios.post('Quizes.json', this.state.quiz)
             //обнуляем стэйт
             this.setState({
                 quiz: [],

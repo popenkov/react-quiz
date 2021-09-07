@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import { NavLink } from 'react-router-dom'
 import classes from './QuizList.module.css'
-import axios from 'axios'
+import axios from '../../axios/axios-quiz';
 import Loader from '../../components/UI/Loader/Loader'
 
 export default class QuizList extends Component {
@@ -26,7 +26,7 @@ export default class QuizList extends Component {
 
     async componentDidMount () {
         try {
-            const response = await axios.get('https://react-quiz-8bce4-default-rtdb.europe-west1.firebasedatabase.app/Quizes.json')//надо обязательно заканчивать JSON
+            const response = await axios.get('Quizes.json')//надо обязательно заканчивать JSON
             //ключи объекта это уникальные ид наших квизов
             //сделаем мапу,чтобы данные можно было использовать внутри реакт компонентов
             const quizes = [];
