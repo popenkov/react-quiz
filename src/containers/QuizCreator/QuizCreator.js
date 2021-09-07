@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import Button from '../../components/UI/Button/Button';
 import classes from './QuizCreator.module.css'
-import {createControl} from '../../form/formFramework'
+import {createControl, validate, validateForm} from '../../form/formFramework'
 import Input from '../../components/UI/Input/Input';
 import Auxiliary from '../../hoc/Auxiliary/Auxiliary';
 import Select from '../../components/UI/Select/Select';
@@ -17,8 +17,8 @@ function createOptionControl(num) {
 function createFormControls() {
     return {
         question: createControl({
-        label: 'Введите вопрос',
-        errorMessage: 'Вопрос не может быть пустым'
+        label: 'PLease enter your question',
+        errorMessage: 'Question couldn`t be empty'
       }, {required: true}),
         option1: createOptionControl(1),
         option2: createOptionControl(2),
@@ -30,6 +30,7 @@ function createFormControls() {
 export default class QuizCreator extends Component {
     state = {
         quiz: [], //сюда будем добавлять объект вопроса.
+        isFormValid: false,
         rightAnswerId: 1,
         formControls: createFormControls()
         }
@@ -38,14 +39,27 @@ export default class QuizCreator extends Component {
         evt.preventDefault();
     }
 
-    addQuestionHandler = () => {
+    addQuestionHandler = evt => {
         //после добавиления вопроса надо обнулить форму, чтобы новый вопрос задавать с новыми данными.
+        evt.preventDefault();
     }
 
     createQuizHandler = () => {
 
     }
     changeHandler = (value, controlName) => {
+        const formControls = {...this.state.formControls}
+        const control = {...formControls[controlName]}
+
+        control.touched = true;
+        control.value = value;
+        control.valid = validate(control.value, control.validation)
+
+        formControls[controlName] = control;
+        this.setState({
+            formControls,
+            isFormValid: validateForm(formControls)
+        })
 
     }
     renderControls() {
@@ -100,12 +114,14 @@ export default class QuizCreator extends Component {
                         <Button
                             type='primary'
                             onClick={this.addQuestionHandler}
+                            disabled={!this.state.isFormValid}
                             >
                             Add question
                         </Button>
                         <Button
                             type='success'
                             onClick={this.createQuizHandler}
+                            disabled={!this.state.quiz.length === 0}
                             >
                             Create quiz
                         </Button>

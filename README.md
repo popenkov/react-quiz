@@ -1062,3 +1062,20 @@ function createFormControls() {
 }
 
 export default Select
+
+
+082 Изменение контролов 
+все также клонируем стэйт, проверяем валидацию и вносим изменения, если все ок
+
+функцию валидации теперь заводим в нашем фреймворке. у нас сейчас только требование для required, так что функцию можно будет потом видоизменить, добавив новые проверки, как уже делали раньше
+export function validate (value, validation = null) {
+    if(!validation) {
+        return true;
+    }
+
+    let isValid = true;
+
+    if (validation.required) {
+        isValid = value.trim() !== '' && isValid;
+    }
+}
