@@ -1079,3 +1079,6 @@ export function validate (value, validation = null) {
         isValid = value.trim() !== '' && isValid;
     }
 }
+
+
+083 Добавление вопроса

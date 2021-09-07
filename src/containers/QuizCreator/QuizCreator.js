@@ -36,7 +36,7 @@ export default class QuizCreator extends Component {
         }
     
     submitHandler = evt => {
-        evt.preventDefault();
+        evt.preventDefault(); 
     }
 
     addQuestionHandler = evt => {
