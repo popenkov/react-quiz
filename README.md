@@ -1181,3 +1181,52 @@ import axios from 'axios'
         }
     }
 
+086 Загрузка списка тестов
+список тестов мы выводим в квизлист
+Запрашивать данные мы должны тогда, когда у нас уже есть ДОМ дерево
+componentDidMount используется в 99% случаев
+
+заводим стэйт для всех квизов
+    state ={
+        quizes: []
+    }
+
+    и записать в него в нужном формате информацию о тестах
+
+    async componentDidMount () {
+        try {
+            const response = await axios.get('https://react-quiz-8bce4-default-rtdb.europe-west1.firebasedatabase.app/Quizes.json')//надо обязательно заканчивать JSON
+            //ключи объекта это уникальные ид наших квизов
+            //сделаем мапу,чтобы данные можно было использовать внутри реакт компонентов
+            const quizes = [];
+            Object.keys(response.data).forEach((key, index) => {
+                quizes.push({
+                    id: key,
+                    name: `Quiz #${index+1}`
+                })
+            })
+
+            this.setState({
+                quizes
+            })
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    теперь в методе рендера квизов наджо использовать стэйт. тут формируется только список квизов
+        renderQuizes() {
+        return this.state.quizes.map(quiz => {
+            return (
+                <li key={quiz.id}>
+                    <NavLink
+                    to={'/quiz/' + quiz.id}
+                    >
+                       {quiz.name}
+                    </NavLink>
+                </li>
+            )
+        })
+    }
+
+
