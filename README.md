@@ -1082,3 +1082,39 @@ export function validate (value, validation = null) {
 
 
 083 Добавление вопроса
+дорабатываем функцию addQuestionHandler, которая добавит объект вопроса в массив quiz и очищает стэйт, чтобы потом можно было задать новый вопрос.
+    addQuestionHandler = evt => {
+        //после добавиления вопроса надо обнулить форму, чтобы новый вопрос задавать с новыми данными.
+        evt.preventDefault();
+        //нам надо сформировать объект из всех вопросов и сложить его в quiz
+        const quiz = this.state.quiz.concat();//конкат без параметров возвращает копию массива
+        const index = quiz.length +1;
+        /* так как подобная запись слишком объемна, обращаемся к синтаксису деструктуризации
+          answers: [
+                {text: this.state.formControls.option1.value, id: this.state.formControls.option1.id},
+            ]
+             */
+        const {question, option1, option2, option3, option4} = this.state.formControls;
+
+        const questionItem = {
+            question: question.value,
+            id: index,
+            rightAnswerId: this.state.rightAnswerId,
+            answers: [
+                {text: option1.value, id: option1.id},
+                {text: option2.value, id: option2.id},
+                {text: option3.value, id: option3.id},
+                {text: option4.value, id: option4.id},
+            ]
+        }
+
+        //теперь когда у нас есть массив ответов, нам надо просто добавить все в массив пуш и обнулить стейт для нового вопроса
+        quiz.push(questionItem);
+        this.setState({
+            quiz,
+            isFormValid: false,
+            rightAnswerId: 1,
+            formControls: createFormControls()
+        })
+        
+    }
