@@ -966,9 +966,9 @@ import {Link} from 'react-router-dom'
 
     ### 080 Создание контролов
     Задача сгенировать инпуты на основе стэйта 
-    В прошлом проекте у нас в стейте для каждого контрола было много повторяющихся ключей. ПОэтому сейчас сделаем все через свой фреймворк
-    //набор функций для создангия контролов, функция вернет объект, похожий, что мы делали в блоке авторизации.
-
+    Раньше мы запускали метод, который из ключей стейта собирал контролы. для отрисовки и изменения контролов нам надо было просто изменять state. В прошлом проекте у нас в стейте для каждого контрола было много повторяющихся ключей. ПОэтому сейчас сделаем все через свой фреймворк.у нас будет функция, которая будет создавать контрол, чтобы в каждом контроле не писать много повторяющихся ключей.
+    //Внутри фреймворка будет набор функций для создангия контролов, функция вернет объект, похожий, что мы делали в блоке авторизации.
+  функция принимает настройки контрола и правила валидации
 export function createControl(config, validation) {
     return {
         ...config,
@@ -978,3 +978,62 @@ export function createControl(config, validation) {
         value: ''
     }
 }
+
+затем мы эту функцию будет использовать внутри state 
+    question: createControl({
+      label: 'Введите вопрос',
+      errorMessage: 'Вопрос не может быть пустым'
+    }, {required: true}),
+  
+затем надо создать 4 варианта ответа, но так как параметры одинаковы, мы создадим функцию для заполнения объекта ответа
+function createOptionControl(number) {
+  return createControl({
+    label: `Вариант ${number}`,
+    errorMessage: 'Значение не может быть пустым',
+    id: number
+  }, {required: true})
+}
+
+затем мы написали функцию для заполнения стэйта, так как после сохранения стэйта, его надо очищать, ятобы при новом вопросе можно было заново заполнить. (все это обычные функции и располагаются выше классового компонента)
+function createFormControls() {
+  return {
+    question: createControl({
+      label: 'Введите вопрос',
+      errorMessage: 'Вопрос не может быть пустым'
+    }, {required: true}),
+    option1: createOptionControl(1),
+    option2: createOptionControl(2),
+    option3: createOptionControl(3),
+    option4: createOptionControl(4)
+  }
+}
+
+и стэйт выглядит так
+  state = {
+    quiz: [], //вопросов может быть несколько, они будут добавляться сюда
+    formControls: createFormControls()
+  }
+
+  для отрисвки инпутов или контроллов мы в ЖСХ вызываем {this.renderControls()} 
+  Метод проходится по стэйту и отрисовывает нам инпуты
+    renderControls() {
+        return Object.keys(this.state.formControls).map((controlName, index) => {
+            const control=this.state.formControls[controlName];
+            return (
+                <Input
+                    value={control.value}
+                    required={control.required}
+                    touched={control.touched}
+                    valid={control.valid}
+                    label={control.label}
+                    shouldValidate= {!!control.validation}
+                    errorMessage={control.errorMessage}
+                    onChange={(event)=>{this.changeHandler(event.target.value, controlName)}}
+                />
+            )
+        })
+    }
+
+
+    ЗАДАЧА: нам надо вернуть два элемента в жсх, но это не возможно, поэтому нам надо добавить обертку, которая сама не будет добавлять никаких тэгов. например React.Fragment или пустой тег
+    Но он создал обычный функциональный компонент Auxiliary, которые возвращает пропс чилдрен. по сути тоже самое
