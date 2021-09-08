@@ -1294,3 +1294,49 @@ axios.post('Quizes.json', this.state.quiz)
         console.log('Quiz id = ', this.props.match.params.id)
         console.log(this.props)
     }
+089 Авторизация
+Страница авторизации. при нажатии на войти мы будем отправлять запрос в наш firebase
+в гугле firebase rest auth https://firebase.google.com/docs/reference/rest/auth 
+мы не устанавливали firebase и поэтому можем работать просто с ссылками, которые предоставляет рест апи firebase
+нас интересует поле https://firebase.google.com/docs/reference/rest/auth#section-sign-in-email-password 
+ЗДесь мы получим ссылку https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=[API_KEY]
+апи ключ мы можем взять в сервисе firebase 
+мы переходим в наш проект и выбираем authentication и там в настройках (у меня шестеренка можно найти код)
+
+В настройках аутенфикации надо включить вход по логину и паролю
+
+в статье по рест апи есть обязательные поля для отправки формы "Тело запроса Payload"
+сформируем объект для этих данных
+
+так выглядят функция авторизации и регистрации
+
+    loginHandler = async () => {
+        const authData = {
+          email: this.state.formControls.email.value,
+          password: this.state.formControls.password.value,
+          returnSecureToken: true
+        }
+        try {
+          const response = await axios.post('https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyDmSEbUiK5KfPbs7TxShOxYJk1eFlqVJtw', authData)
+    
+          console.log(response.data)
+        } catch (e) {
+          console.log(e)
+        }
+      }
+
+    registerHandler = async () => {
+        const authData = {
+            email: this.state.formControls.email.value,
+            password: this.state.formControls.password.value,
+            returnSecureToken: true
+        }
+        
+        try {
+            const response = await axios.post("https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDmSEbUiK5KfPbs7TxShOxYJk1eFlqVJtw", authData);
+            console.log(response.data)
+        } catch (err) {
+            console.log(err)
+        }
+
+    }
