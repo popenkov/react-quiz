@@ -1683,3 +1683,101 @@ export default connect(mapStateToProps, mapDispatchToProps)(App)
 
 ### 099 Асинхронное изменение State 
 как диспатчить асинхронные экшны, используя редакс
+099 Асинхронное изменение State
+как диспатчить асинхронные экшны через редакс
+библиотека redux thunk https://github.com/reduxjs/redux-thunk
+это миддлвэр, который можно использовать наравне с другими  миддлвэр.
+Импортируем библиотеку и вставляет в функцию applyMiddleware
+
+import reduxThunk from 'redux-thunk'
+const store = createStore(rootReducer, applyMiddleware(
+  loggerMiddleware,
+  reduxThunk
+))
+
+Данная библиотека позволяет в экшн креатор вернуть не объект, а вернуть новую функцию, которая принимает параметр диспатч. И теперь в функции можно запускать асинхронный код. Dispatch — это тот же самый диспатч, чтобы используем для диспатча экщна, только мы теперь имеем к нему доступ в асинхронном коде.
+export function asyncAdd(number) {
+  return (dispatch) => {
+    setTimeout(() => {
+      dispatch(addNumber(number))
+    }, 3000)
+  }
+}
+
+
+
+
+100 Devtools
+
+redux devtools
+использует этот https://github.com/zalmoxisus/redux-devtools-extension 
+Устанавливается в браузер
+
+Дальше надо произвести настройку инструмента:
+Вставил в индекс.жс перед определением стора.
+
+const composeEnhancers =
+  typeof window === 'object' &&
+  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?   
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
+      // Specify extension’s options like name, actionsBlacklist, actionsCreators, serialize...
+    }) : compose;
+
+Здесь описано, что если у нас есть объект виндоу и объект расширения, то мы будем его использовать, или функцию compose, которую надо импортировать из редакса
+import {createStore, applyMiddleware, compose} from 'redux'
+
+
+и затем в функцию композЕнансер надо сложить весь мидлвэр
+const store = createStore(rootReducer, composeEnhancers(applyMiddleware(
+  loggerMiddleware,
+  reduxThunk
+)))
+
+девтулс может возвращаться на определенные состояния, отслеживать разницу, показывать какие экшны были вызваны.
+
+
+# 12 Практика. Redux
+### 101 Настройка приложения
+npm install redux react-redux redux-thunk
+
+- создаем стор в индекс.жс
+-- импортируем криэйтСтор
+import {createStore} from 'redux'
+--импортируем провайдер из реакт-редакс
+import {Provider} from 'react-redux'
+--оборачиваем компонент апп в провайдер
+    <Provider store={store}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </Provider>
+-- формируем стор
+const store = createStore(rootReducer);
+
+-- в папке src создаем папку store, где будем хранить все, что относится к редаксу. В сторе создаем папку actions, reducers.
+-- в редьюсерс создадим файл rootReducer
+import {combineReducers} from 'redux'
+
+export default combineReducers ({
+    
+})
+-- импортируем rootReducer в индексжс и передаем в криэйтСтор
+
+-- подключаем девтулз, композ импортируем из редакс и applyMiddleware
+
+const composeEnhancers =
+  typeof window === 'object' &&
+  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?   
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
+      // Specify extension’s options like name, actionsBlacklist, actionsCreators, serialize...
+    }) : compose;
+
+-- передаем composeEnhancers вторым параметром в криэйтСтор, в которую передадим applyMiddleware
+const store = createStore(
+  rootReducer,
+  composeEnhancers(
+    applyMiddleware(thunk)
+    )
+  );
+
+-- в папку actions создаем файл actionTypes.js
