@@ -1343,8 +1343,17 @@ axios.post('Quizes.json', this.state.quiz)
 
 
 
+REDUX под капотом
+function createStore(reducer, initialState) {
+    let state = initialState
+    return {
+        dispatch: action => { state = reducer(state, action) },
+        getState: () => state,
+    }
+}
+
 REDUX
-Это абстракция для работы с данными. Это идеалогия формирования данных на фронтенде, никак не связанная с реакт.
+Это абстракция для работы с данными. Это идеология формирования данных на фронтенде, никак не связанная с реакт.
 npm install redux
 
 создал отдельный файл под редакс
@@ -1480,3 +1489,197 @@ const app = (
 )
 
 ReactDOM.render(app, document.getElementById('root'));
+
+093 Подключение компонента
+Есть функция для связи реакта и редакса. она называется коннект и импортируется из реакт-редакс
+
+import {connect} from 'react-redux'
+
+Эта функция HOC
+
+экспорт выглядит так (это не опечатка)
+export default connect()(App)
+то есть мы вызвали функцию connect, она нам возвращает новую функцию, в которую мы передаем App
+
+connect может принимать в себя два опциональных параметра (две функции).  Эти функции пишутся вне класса (после него), если у нас классовый компонент.
+Порядок функций также важен. Сначала передается первая функция, затем вторая. Если мы хотим передать только вторую функцию, то первым параметром передается null.
+1. Делаем из стэйта параметры для передачи в компонент 
+function mapStateToProps(state) {
+  return {
+    counter: state.counter
+  }
+}
+
+export default connect(mapStateToProps)(App)
+
+Теперь в компонент App (!!!) будто бы передали пропс counter, хотя обычным способом ничего передано не было.
+Теперь можно удалить из апп стэйт и обращаться к свойствам инишл стэйта как this.props.counter
+
+094 Изменение State
+
+Нам надо через компонент App через roodReducer изменять состояние. Для этого создаем вторую функцию, которую передадим в коннект при экспорте.
+Эта функция позволит нам манипулировать стором.
+Параметр dispatch - это и есть та функция dispatch, которая вызывает экшны.
+!!! Внутри mapDispatchToProps мы можем создавать кастомные функции как параметры для объекта, который мы оборачиваем в коннект.
+
+
+2. function mapDispatchToProps(dispatch) {
+  return {
+    onAdd: () => dispatch({type: 'ADD'}),
+    onSub: () => dispatch({type: 'SUB'})
+  }
+}
+
+
+В итоге: 
+
+<button onClick={this.props.onAdd}>Добавить 1</button>
+<button onClick={this.props.onSub}>Вычесть 1</button>
+
+function mapStateToProps(state) {
+  return {
+    counter: state.counter
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    onAdd: () => dispatch({type: 'ADD'}),
+    onSub: () => dispatch({type: 'SUB'})
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)
+
+
+### 097 Как работает Middleware
+
+это функция, которая добавляет определенный функционал чему-то.
+Например, необходимо создать функцию, которая при изменении стора будет выводить в лог что-то.
+
+Такая функция принимает параметром стор, с которым мы будем работать.
+функция возвращает другую функцию, которая возвращает другую функцию, которая уже вернет результат после использования экшна.
+// function loggerMiddleware(store) {
+//   return function(next) {
+//     return function(action) {
+//       const result = next(action)
+//       console.log('Middleware', store.getState())
+//       return result
+//     }
+//   }
+// }
+
+Чтобы применить миддлевэр в редаксе есть функция applyMiddleware
+import {createStore, applyMiddleware} from 'redux'
+И эта функция передается в createStore, в которой мы перечисляем используемые миддлвэр
+
+Второй вариант написания с ес6 синтаксисом.
+const loggerMiddleware = store => next => action => {
+  const result = next(action)
+  console.log('Middleware', store.getState())
+  return result
+}
+
+const store = createStore(rootReducer, applyMiddleware(loggerMiddleware))
+
+### 098 Что такое Action Creator
+это функция, которая создает новый экшн. их смысл в том, что мы можем описывать и изменять экшн тайпы в одном месте и теперь не надо задумываться, что указано в разных документах (в редьюсере, в экшнах). все занесено в константы в одном документе. а в других местах просто вызывается функция. 
+в папке редакс создает папку экщнс и там два документа
+
+
+#### actionTypes.js
+ЗДесь мы создаем экшн тайпы, которые существуют для нашего приложения. То есть записываем в константы те экшн тайпы, которые есть у нас в приложении, и экспортируем.
+Главное, чтобы экшнтайпы имели уникальное название и не пересекались друг с другом.
+
+export const ADD = 'ADD'
+export const SUB = 'SUB'
+export const ADD_NUMBER = 'ADD_NUMBER'
+export const ADD2 = 'ADD2'
+
+#### actions.js
+ЗДесь мы создаем экшнкреаторы. экшнкреаторы - это функции, которые выдают определенный экшн
+
+import {ADD, ADD2, ADD_NUMBER, SUB} from './actionTypes'
+
+export function add() {
+  return {
+    type: ADD
+  }
+}
+
+export function sub() {
+  return {
+    type: SUB
+  }
+}
+
+export function addNumber(number) {
+  return {
+    type: ADD_NUMBER,
+    payload: number
+  }
+}
+
+export function add2(number) {
+  return {
+    type: ADD2,
+    payload: number
+  }
+}
+
+
+Также заменяем строки на константы в редьюсере
+import {ADD, ADD_NUMBER, SUB} from '../actions/actionTypes';
+
+const initialState = {
+  counter: 0
+}
+
+export default function counter1(state = initialState, action) {
+  switch(action.type) {
+    case ADD:
+      return {
+        counter: state.counter + 1
+      }
+    case SUB:
+      return {
+        counter: state.counter - 1
+      }
+    case ADD_NUMBER:
+      return {
+        counter: state.counter + action.payload
+      }
+    default:
+      return state
+  }
+}
+
+
+Теперь мы можем так пользоваться экшенами в компонентах 
+import {add, sub, addNumber} from './redux/actions/actions';
+
+
+  <div className="Actions">
+    <button onClick={this.props.onAdd}>Добавить 1</button>
+    <button onClick={this.props.onSub}>Вычесть 1</button>
+  </div>
+
+  <div className="Actions">
+    <button onClick={() => this.props.onAddNumber(15)}>Добавить 15</button>
+    <button onClick={() => this.props.onAddNumber(-17)}>Вычесть 17</button>
+  </div>
+
+
+function mapDispatchToProps(dispatch) {
+  return {
+    onAdd: () => dispatch(add()),
+    onSub: () => dispatch(sub()),
+    onAddNumber: number => dispatch(addNumber(number))
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)
+
+
+### 099 Асинхронное изменение State 
+как диспатчить асинхронные экшны, используя редакс
