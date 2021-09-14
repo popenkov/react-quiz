@@ -1781,3 +1781,66 @@ const store = createStore(
   );
 
 -- в папку actions создаем файл actionTypes.js
+
+
+102 Список тестов
+QuizList.js
+В этом компоненте мы получаем тесты с сервера
+-- добавляем коннект в компонент
+import { connect } from 'react-redux';
+export default connect()(QuizList)
+-- в папке редьюсерс создаем файл quiz.js, который будет отвечать за редьюсер для данного компонента и для активного теста
+const initialState = {
+    quizes: [],
+    loading: true
+}
+
+export default quizReducer (state=initialState, action) {
+    switch(action.type) {
+
+        default:
+            return state;
+    }
+}
+    
+-- пишем в mapStateToProps и в mapDispatchToProps что нам надо получить в компонент пропсами. это содержимое стэйта (массив с квизами и статус лоадинг). В mapDispatchToProps нам нужно получить функцию для загрузки квизов с сервера renderQuizes.
+Эту функцию мы объявим в файле quiz.js в папке actions
+
+ДЛя всего используем actionCreator. в запросах если успешно данные загрузились диспатчим один экшн, если ошибка, то другой. все на экшнах
+
+
+так выглядит редьюсер
+import { FETCH_QUIZES_ERROR, FETCH_QUIZES_SUCCESS, FETCH_QUIZES_START } from "../actions/actionTypes";
+
+const initialState = {
+    quizes: [],
+    loading: false,
+    error: null
+}
+
+export default function quizReducer (state=initialState, action) {
+    switch(action.type) {
+        case FETCH_QUIZES_START:
+            return {
+                ...state, loading: true
+            }
+        case FETCH_QUIZES_SUCCESS:
+            return {
+                ...state, loading: false, quizes: action.quizes
+            }
+        case FETCH_QUIZES_ERROR:
+            return {
+                ...state, loading: false, error: action.error
+            }
+        default:
+            return state;
+    }
+}
+  
+
+### 103 Страница теста. Часть 1
+компонент Quiz.js
+мы будем рефакторить только контейнеры, обладающие стэйтом. функциональные компоненты не трогаем.
+Состояния Quiz.js описывает в том же сторе и редьюсере что и квизлист
+
+использует один ключ стэйта лоадинг на 2 страницы, так как они не пересекаются.
