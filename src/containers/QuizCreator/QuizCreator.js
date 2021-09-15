@@ -5,7 +5,9 @@ import {createControl, validate, validateForm} from '../../form/formFramework'
 import Input from '../../components/UI/Input/Input';
 import Auxiliary from '../../hoc/Auxiliary/Auxiliary';
 import Select from '../../components/UI/Select/Select';
-import axios from '../../axios/axios-quiz';
+
+import { connect } from 'react-redux';
+import {finishCreateQuiz, createQuizQuestion} from '../../store/actions/create'
 
 function createOptionControl(num) {
     return createControl({
@@ -28,9 +30,8 @@ function createFormControls() {
     }
 }
 
-export default class QuizCreator extends Component {
+ class QuizCreator extends Component {
     state = {
-        quiz: [], //сюда будем добавлять объект вопроса.
         isFormValid: false,
         rightAnswerId: 1,
         formControls: createFormControls()
@@ -43,19 +44,12 @@ export default class QuizCreator extends Component {
     addQuestionHandler = evt => {
         //после добавиления вопроса надо обнулить форму, чтобы новый вопрос задавать с новыми данными.
         evt.preventDefault();
-        //нам надо сформировать объект из всех вопросов и сложить его в quiz
-        const quiz = this.state.quiz.concat();//конкат без параметров возвращает копию массива
-        const index = quiz.length +1;
-        /* так как подобная запись слишком объемна, обращаемся к синтаксису деструктуризации
-          answers: [
-                {text: this.state.formControls.option1.value, id: this.state.formControls.option1.id},
-            ]
-             */
+
         const {question, option1, option2, option3, option4} = this.state.formControls;
 
         const questionItem = {
             question: question.value,
-            id: index,
+            id: this.props.quiz.index+1,
             rightAnswerId: this.state.rightAnswerId,
             answers: [
                 {text: option1.value, id: option1.id},
@@ -65,10 +59,9 @@ export default class QuizCreator extends Component {
             ]
         }
 
-        //теперь когда у нас есть массив ответов, нам надо просто добавить все в массив пуш
-        quiz.push(questionItem);
+        this.props.createQuizQuestion(questionItem);
+
         this.setState({
-            quiz,
             isFormValid: false,
             rightAnswerId: 1,
             formControls: createFormControls()
@@ -76,21 +69,18 @@ export default class QuizCreator extends Component {
         
     }
 
-    createQuizHandler = async evt => {
+    createQuizHandler = evt => {
         evt.preventDefault();
-        try { //с помощью эвэйт мы дождемся ответа и распарсим промис в переменную респонс
-            await axios.post('Quizes.json', this.state.quiz)
-            //обнуляем стэйт
-            this.setState({
-                quiz: [],
-                isFormValid: false,
-                rightAnswerId: 1,
-                formControls: createFormControls()
-            })    
-        } catch (e){
-            console.log(e)
 
-        }
+        
+        //обнуляем стэйт
+        this.setState({
+            isFormValid: false,
+            rightAnswerId: 1,
+            formControls: createFormControls()
+        }) 
+        console.log(this.props)  
+        this.props.finishCreateQuiz() 
     }
 
     changeHandler = (value, controlName) => {
@@ -167,7 +157,7 @@ export default class QuizCreator extends Component {
                         <Button
                             type='success'
                             onClick={this.createQuizHandler}
-                            disabled={!this.state.quiz.length === 0}
+                            disabled={!this.props.quiz.length === 0}
                             >
                             Create quiz
                         </Button>
@@ -178,3 +168,18 @@ export default class QuizCreator extends Component {
         )
     }
 }
+
+function mapStateToProps (state) {
+    return {
+        quiz: state.create.quiz
+    }
+}
+
+function mapDispatchToProps (dispatch) {
+    return {
+        finishCreateQuiz: dispatch(finishCreateQuiz()),
+        createQuizQuestion: item => dispatch(createQuizQuestion(item))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(QuizCreator)
