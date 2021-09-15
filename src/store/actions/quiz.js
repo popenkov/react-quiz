@@ -3,7 +3,11 @@ import {
     FETCH_QUIZES_START, 
     FETCH_QUIZES_SUCCESS, 
     FETCH_QUIZES_ERROR, 
-    FETCH_QUIZ_SUCCESS
+    FETCH_QUIZ_SUCCESS,
+    QUIZ_SET_STATE,
+    FINISH_QUIZ,
+    QUIZ_NEXT_QUESTION,
+    START_NEW_GAME
 } from './actionTypes'
 
 export function fetchQuizes () {
@@ -75,8 +79,25 @@ export function fetchQuizesError (e) {
     }
 }
 
-export function quizSetState () {
+export function quizSetState (answerState, results) {
+    return {
+        type: QUIZ_SET_STATE,
+        answerState,
+        results
+    }
+}
 
+export function finishQuiz() {
+    return {
+        type: FINISH_QUIZ
+    }
+}
+
+export function quizNextQuestion (number) {
+    return {
+        type: QUIZ_NEXT_QUESTION,
+        number
+    }
 }
 
 export function quizAnswerClick(answerId) {
@@ -92,33 +113,24 @@ export function quizAnswerClick(answerId) {
             }
         }
 
-        const question = state.quiz[this.state.activeQuestion]
+        const question = state.quiz[state.activeQuestion]
         const results = state.results
 
         if (question.rightAnswerId === answerId) {
             if (!results[question.id]) { //если объект пустой
                 results[question.id] = 'success';
             } 
-            dispatch(quizSetState())
-      /*       this.setState({
-                answerState: {[answerId]: 'success'} ,
-                results
-            }) */
-            
+            dispatch(quizSetState({[answerId]: 'success'}, results))    
 
             //чтобы в течение секунды показать, что ответ правильный
             const timeout = window.setTimeout(() => {
                 //проверка, закончились ли вопросы
-                if (this.isQuizFinished()) {
-                    
-                   /*  this.setState({
-                        isFinished: true
-                    }) */
+                if (isQuizFinished(state)) {
+                    dispatch(finishQuiz())
+
                 } else {
- /*                    this.setState({
-                        activeQuestion: this.state.activeQuestion + 1,
-                        answerState: null
-                    }) */
+                    dispatch(quizNextQuestion(state.activeQuestion + 1,))
+
                 }
 
                 window.clearTimeout(timeout);
@@ -126,11 +138,19 @@ export function quizAnswerClick(answerId) {
 
         } else {
             results[question.id] = 'error';
-/*             this.setState({
-                answerState: {[answerId]: 'error'},
-                results: results //или просто results
-            }) */
-
+            dispatch(quizSetState({[answerId]: 'error'}, results))
         } 
+    }
+}
+
+function isQuizFinished(state) {
+
+    return state.activeQuestion + 1 === state.quiz.length;
+ 
+}
+
+export function startNewGame() {
+    return {
+        type: START_NEW_GAME
     }
 }

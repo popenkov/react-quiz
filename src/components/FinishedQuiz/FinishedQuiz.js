@@ -16,6 +16,8 @@ const FinishedQuiz = props => {
     }, 0)
 
 
+
+
     return (
         <div className={classes.FinishedQuiz}>
             <ul>
